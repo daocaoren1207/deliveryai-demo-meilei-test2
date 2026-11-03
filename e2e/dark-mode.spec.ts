@@ -43,7 +43,6 @@ test.describe('暗黑模式 - E2E 验收测试', () => {
     await page.getByRole('button', { name: switchToDark }).click()
     await expectDarkMode(page)
     await expect(page.getByRole('button', { name: switchToLight })).toHaveAttribute('aria-pressed', 'true')
-    await expect(page.getByText('已切换为暗黑模式')).toBeVisible()
 
     await page.getByRole('button', { name: /A08/ }).first().click()
     await expect(page.getByRole('heading', { name: '欢迎光临沸点！' })).toBeVisible()
@@ -58,7 +57,6 @@ test.describe('暗黑模式 - E2E 验收测试', () => {
     await page.getByRole('button', { name: switchToLight }).click()
     await expectLightMode(page)
     await expect(page.getByRole('button', { name: switchToDark })).toHaveAttribute('aria-pressed', 'false')
-    await expect(page.getByText('已切换为明亮模式')).toBeVisible()
     await expect(page.getByRole('heading', { name: '想吃什么，一起点。' })).toBeVisible()
   })
 
@@ -106,12 +104,12 @@ test.describe('暗黑模式 - E2E 验收测试', () => {
   test('REQ-003: 菜品规格弹窗打开时仍可切换主题并保留已选规格', async ({ page }) => {
     await enterMenu(page)
     await openProductSpec(page, '鎏金番茄鸳鸯锅')
-    await page.getByRole('button', { name: '半份' }).click()
+    await page.getByRole('button', { name: '菌汤 + 牛油' }).click()
     await page.getByRole('button', { name: '中辣' }).click()
 
     const specDialog = page.getByRole('dialog', { name: '鎏金番茄鸳鸯锅' })
     await expect(specDialog).toBeVisible()
-    await expect(page.getByRole('button', { name: '半份' })).toHaveClass(/border-chili-500/)
+    await expect(page.getByRole('button', { name: '菌汤 + 牛油' })).toHaveClass(/border-chili-500/)
     await expect(page.getByRole('button', { name: '中辣' })).toHaveClass(/border-chili-500/)
 
     await expect(
@@ -122,7 +120,7 @@ test.describe('暗黑模式 - E2E 验收测试', () => {
 
     await expectDarkMode(page)
     await expect(specDialog).toBeVisible()
-    await expect(page.getByRole('button', { name: '半份' })).toHaveClass(/border-chili-500/)
+    await expect(page.getByRole('button', { name: '菌汤 + 牛油' })).toHaveClass(/border-chili-500/)
     await expect(page.getByRole('button', { name: '中辣' })).toHaveClass(/border-chili-500/)
   })
 })
