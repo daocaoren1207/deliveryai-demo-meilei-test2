@@ -51,7 +51,7 @@ test.describe('暗黑模式 - E2E 验收测试', () => {
     await page.getByRole('button', { name: /进入点餐|Enter/ }).click()
     await expect(page).toHaveURL(/#\/menu$/)
     await expect(page.getByRole('heading', { name: '想吃什么，一起点。' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: '本桌购物车' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: '这一锅，还差点心动' })).toBeVisible()
     await expectDarkMode(page)
 
     await page.getByRole('button', { name: switchToLight }).click()
