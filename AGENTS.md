@@ -51,14 +51,14 @@ playwright.config.ts       # E2E 配置
 | chili | 50 `#fff1ef` / 100 `#ffddd8` / 500 `#e13b2b` / 600 `#c92f21` / 700 `#a9231a` | 按钮、强调、徽章 |
 | amber | 100 `#fff2c7` / 400 `#f5b83f` / 500 `#e69b18` | 徽章、进度色 |
 
-当前为单一浅色主题，Tailwind 未配置 `darkMode`，组件中没有 `dark:` 变体。全局颜色/字号变化有 250ms 过渡（`src/index.css`），老人模式切换无需额外动画。
+暗黑模式使用 Tailwind `darkMode: 'class'` 与组件内 `dark:` 变体；`src/hooks/useThemeMode.ts` 负责 `html.dark`、`color-scheme`、`theme-color` 与本地偏好，`index.html` 内联脚本在 React 挂载前同步初始主题，避免首屏闪烁。全局颜色/字号变化有 250ms 过渡（`src/index.css`），老人模式切换无需额外动画。
 
 ## 编码约定
 
 - 页面组件放 `src/components/`，通用件放 `src/components/ui/`；弹窗用封装的 `Dialog`，按钮用 CVA `Button`（default/secondary/outline/ghost），图标用 lucide-react 并靠 `currentColor` 继承。
 - 样式只用 Tailwind 类名，不用 CSS Modules / styled-components。
 - 新增 i18n 文案在 `src/i18n.ts` 的 zh/en 两处同步添加，按功能分组（`common.`、`menu.`、`cart.`、`order.` 等）。
-- 新增 `localStorage` 持久化一律 `try/catch` 包裹，不可用时降级内存态；现有 key：`i18nextLng`、`elderly-mode`（`true`/`false`）。
+- 新增 `localStorage` 持久化一律 `try/catch` 包裹，不可用时降级内存态；现有 key：`i18nextLng`、`elderly-mode`（`true`/`false`）、`theme-mode`（`light`/`dark`）。
 - 需要在 React 挂载前设置 html 属性/class 时，扩展 `index.html` 的内联脚本。
 - npm 源默认走 `https://registry.npmmirror.com`（见根目录与 `server/.npmrc`）。
 
