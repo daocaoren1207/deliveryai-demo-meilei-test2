@@ -4,16 +4,20 @@ import { AlertTriangle, Check, Flame, Plus, Search, Sparkles, Users } from 'luci
 import { categories, products } from '@/data/menu'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import { money, uid } from '@/lib/utils'
 import type { CartItem, Product } from '@/types'
+import type { ThemeMode } from '@/hooks/useThemeMode'
 
 interface MenuViewProps {
   diners: string[]
   soldOut: string[]
+  themeMode: ThemeMode
+  onToggleTheme: () => void
   onAdd: (item: CartItem) => void
 }
 
-export function MenuView({ diners, soldOut, onAdd }: MenuViewProps) {
+export function MenuView({ diners, soldOut, themeMode, onToggleTheme, onAdd }: MenuViewProps) {
   const { t } = useTranslation()
   const [category, setCategory] = useState('menu.cat.recommend')
   const [search, setSearch] = useState('')
@@ -106,6 +110,9 @@ export function MenuView({ diners, soldOut, onAdd }: MenuViewProps) {
       <Dialog open={!!selected} onOpenChange={(open) => { if (!open) { setSelected(null); setShowRiskWarning(false) } }}>
         <DialogContent title={selected ? t(selected.name) : ''}>
           {selected && <>
+            <div className="mt-4 flex justify-end">
+              <ThemeToggle mode={themeMode} onToggle={onToggleTheme} />
+            </div>
             <div className="mt-4 flex gap-4 rounded-2xl bg-white p-3 dark:bg-charcoal-700"><img src={selected.image} alt={t(selected.name)} className="h-24 w-24 rounded-xl object-cover" /><div><p className="text-sm leading-6 text-charcoal-500 dark:text-rice-200">{t(selected.description)}</p><p className="mt-2 text-xl font-extrabold text-chili-500">{money(selected.price)} <small className="text-xs font-medium text-charcoal-500 dark:text-rice-200">{t('menu.from')}</small></p></div></div>
             {selected.options?.portion && <OptionRow label={t('menu.select_portion')} options={selected.options.portion} value={portion} onChange={setPortion} t={t} />}
             {selected.options?.flavor && <OptionRow label={t('menu.select_flavor')} options={selected.options.flavor} value={flavor} onChange={setFlavor} t={t} />}
