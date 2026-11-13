@@ -14,6 +14,7 @@ import { TopBar } from '@/components/TopBar'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { useElderlyMode } from '@/hooks/useElderlyMode'
+import { useThemeMode } from '@/hooks/useThemeMode'
 import { initialViewFromHash, useViewRoute } from '@/hooks/useViewRoute'
 import { orderReducer, initialState } from '@/state/orderReducer'
 import { products } from '@/data/menu'
@@ -50,6 +51,7 @@ export default function App() {
   const { t, i18n } = useTranslation()
   const [state, dispatch] = useReducer(orderReducer, undefined, createInitialState)
   const { enabled: elderly, toggle: toggleElderly } = useElderlyMode()
+  const { mode: themeMode, toggle: toggleTheme } = useThemeMode()
   const [serviceOpen, setServiceOpen] = useState(false)
   const [consoleOpen, setConsoleOpen] = useState(false)
   const [cartOpen, setCartOpen] = useState(false)
@@ -85,25 +87,32 @@ export default function App() {
     toggleElderly()
     dispatch({ type: 'SET_MESSAGE', message: elderly ? '已切换为常规模式' : '已切换为老人模式' })
   }
+  const handleToggleTheme = () => {
+    const nextTheme = themeMode === 'dark' ? 'light' : 'dark'
+    toggleTheme()
+    dispatch({ type: 'SET_MESSAGE', message: t(nextTheme === 'dark' ? 'message.theme_dark' : 'message.theme_light') })
+  }
 
   if (state.view === 'home' || !state.table) {
-    return <HomeView onBind={(table) => dispatch({ type: 'BIND_TABLE', table })} />
+    return <HomeView themeMode={themeMode} onToggleTheme={handleToggleTheme} onBind={(table) => dispatch({ type: 'BIND_TABLE', table })} />
   }
 
   if (state.view === 'welcome') {
-    return <WelcomeView table={state.table!} onEnter={() => dispatch({ type: 'SET_VIEW', view: 'menu' })} />
+    return <WelcomeView table={state.table!} themeMode={themeMode} onToggleTheme={handleToggleTheme} onEnter={() => dispatch({ type: 'SET_VIEW', view: 'menu' })} />
   }
 
   return (
-    <div className="min-h-screen bg-rice-100 paper-noise">
+    <div className="min-h-screen bg-rice-100 paper-noise dark:bg-charcoal-900">
       <TopBar
         table={state.table}
         view={state.view}
         serviceCount={waitingServices}
         language={i18n.language}
         elderly={elderly}
+        themeMode={themeMode}
         onToggleLanguage={toggleLanguage}
         onToggleElderly={handleToggleElderly}
+        onToggleTheme={handleToggleTheme}
         onView={changeView}
         onService={() => setServiceOpen(true)}
         onConsole={() => setConsoleOpen(true)}
@@ -112,14 +121,20 @@ export default function App() {
       {state.view === 'menu' && (
         <main className="mx-auto grid max-w-7xl gap-6 px-4 py-5 pb-28 lg:grid-cols-3 lg:px-6 lg:py-7 lg:pb-8">
           <div className="lg:col-span-2">
-            <MenuView diners={state.diners} soldOut={state.soldOut} onAdd={(item) => dispatch({ type: 'ADD_CART', item })} />
+            <MenuView
+              diners={state.diners}
+              soldOut={state.soldOut}
+              themeMode={themeMode}
+              onToggleTheme={handleToggleTheme}
+              onAdd={(item) => dispatch({ type: 'ADD_CART', item })}
+            />
           </div>
           <aside className="hidden lg:block">
             <div className="sticky top-28">
               <CartPanel items={state.cart} onQuantity={(uid, delta) => dispatch({ type: 'CHANGE_QTY', uid, delta })} onSubmit={submitOrder} />
-              <div className="mt-4 rounded-2xl border border-amber-400/30 bg-amber-100/70 p-4 text-sm text-charcoal-700">
+              <div className="mt-4 rounded-2xl border border-amber-400/30 bg-amber-100/70 p-4 text-sm text-charcoal-700 dark:bg-amber-400/10 dark:text-rice-100">
                 <p className="font-bold">{t('common.collab_title')}</p>
-                <p className="mt-1 leading-6 text-charcoal-500">{t('common.collab_desc')}</p>
+                <p className="mt-1 leading-6 text-charcoal-500 dark:text-rice-200">{t('common.collab_desc')}</p>
               </div>
             </div>
           </aside>
@@ -169,14 +184,14 @@ export default function App() {
         )}
       </div>
 
-      <nav className="safe-bottom fixed bottom-0 left-0 right-0 z-30 grid grid-cols-4 border-t border-charcoal-900/5 bg-white/95 px-2 pt-2 backdrop-blur lg:hidden">
+      <nav className="safe-bottom fixed bottom-0 left-0 right-0 z-30 grid grid-cols-4 border-t border-charcoal-900/5 bg-white/95 px-2 pt-2 backdrop-blur dark:border-rice-200/10 dark:bg-charcoal-900/95 lg:hidden">
         <MobileNav active={state.view === 'menu'} icon={MenuIcon} label={t('common.nav_menu')} onClick={() => changeView('menu')} />
         <MobileNav active={state.view === 'order'} icon={ClipboardList} label={t('common.nav_order')} onClick={() => changeView('order')} />
         <MobileNav active={serviceOpen} icon={ConciergeBell} label={t('common.nav_service')} badge={waitingServices} onClick={() => setServiceOpen(true)} />
         <MobileNav active={consoleOpen} icon={LayoutDashboard} label={t('common.nav_demo')} onClick={() => setConsoleOpen(true)} />
       </nav>
 
-      <div className="pointer-events-none fixed left-1/2 top-24 z-40 -translate-x-1/2 rounded-full bg-charcoal-900/90 px-4 py-2 text-xs font-semibold text-white shadow-float">
+      <div className="pointer-events-none fixed left-1/2 top-24 z-40 -translate-x-1/2 rounded-full bg-charcoal-900/90 px-4 py-2 text-xs font-semibold text-white shadow-float dark:bg-rice-50/95 dark:text-charcoal-900">
         {state.lastMessage}
       </div>
     </div>
@@ -185,7 +200,7 @@ export default function App() {
 
 function MobileNav({ active, icon: Icon, label, badge, onClick }: { active: boolean; icon: typeof MenuIcon; label: string; badge?: number; onClick: () => void }) {
   return (
-    <button onClick={onClick} className={`relative flex flex-col items-center gap-1 rounded-xl py-2 text-xs font-semibold transition ${active ? 'bg-chili-50 text-chili-500' : 'text-charcoal-500'}`}>
+    <button onClick={onClick} className={`relative flex flex-col items-center gap-1 rounded-xl py-2 text-xs font-semibold transition ${active ? 'bg-chili-50 text-chili-500 dark:bg-chili-500/15 dark:text-chili-100' : 'text-charcoal-500 dark:text-rice-200'}`}>
       <Icon size={20} />{label}{badge ? <span className="absolute right-4 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-chili-500 px-1 text-white">{badge}</span> : null}
     </button>
   )
